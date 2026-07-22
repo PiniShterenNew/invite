@@ -1,0 +1,240 @@
+// "באים?" — data model.
+// Production uses PostgreSQL. The test setup generates a temporary SQLite
+// variant of this schema so the test suite stays self-contained.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Auth.js (organizers only; guests never authenticate) ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("USER") // USER | ADMIN
+  disabledAt    DateTime?
+  createdAt     DateTime  @default(now())
+  accounts      Account[]
+  sessions      Session[]
+  events        Event[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------- Core ----------
+
+model Event {
+  id          String    @id @default(cuid())
+  slug        String    @unique // public token for the general link (nanoid 12)
+  organizerId String
+  organizer   User      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  // basics
+  type      String // BIRTHDAY | HOUSE_PARTY | ROOFTOP | BACHELOR | BACHELORETTE | OTHER
+  name      String
+  hostName  String
+  startsAt  DateTime
+  endsAt    DateTime?
+  timezone  String    @default("Asia/Jerusalem")
+
+  // location
+  locationName    String?
+  locationAddress String?
+  addressReveal   String  @default("AFTER_RSVP") // ALWAYS | AFTER_RSVP | PERSONAL_ONLY
+
+  // design (no free editor — template + limited knobs)
+  template   String @default("classic") // classic | midnight | sunset | garden
+  accentColor String @default("coral")
+  typography  String @default("default")
+  coverImage  String? // storage key
+
+  // optional content sections
+  description  String?
+  dressCode    String?
+  scheduleJson String? // [{time,label}] as JSON string
+  bringList    String?
+  playlistUrl  String?
+  showCountdown Boolean @default(true)
+
+  // announcement (single prominent update, no feed)
+  announcement          String?
+  announcementUpdatedAt DateTime?
+
+  // access & privacy
+  accessMode        String  @default("GENERAL") // GENERAL | PERSONAL_ONLY | CODE
+  accessCodeHash    String?
+  showGuestList     Boolean @default(false)
+  generalLinkMaxParty Int   @default(1) // party size cap per general-link RSVP
+
+  // rsvp policy
+  rsvpDeadline   DateTime?
+  deadlinePolicy String    @default("WARN") // BLOCK | WARN
+  capacity       Int? // total confirmed attendees cap (YES only)
+
+  // organizer notifications for this event
+  notifyMode String @default("IMMEDIATE") // IMMEDIATE | DAILY | NONE
+
+  // lifecycle
+  status        String    @default("DRAFT") // DRAFT | PUBLISHED | ENDED | ARCHIVED
+  disabledAt    DateTime? // set by admin moderation
+  endedAt       DateTime?
+  warnedAt      DateTime? // pre-anonymization warning email sent
+  anonymizedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  guests    Guest[]
+  questions CustomQuestion[]
+
+  @@index([organizerId, status])
+  @@index([status, endedAt])
+}
+
+model Guest {
+  id          String    @id @default(cuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String?
+  maxParty    Int       @default(1) // seats this invitation covers
+  inviteToken String    @unique // nanoid 24 — the personal link
+  viaGeneralLink Boolean @default(false)
+  shareOpenedAt  DateTime? // organizer tapped share for this guest
+  linkOpenedAt   DateTime? // guest first opened their link
+  createdAt   DateTime  @default(now())
+
+  rsvp    Rsvp?
+  profile AttendeeProfile?
+
+  @@index([eventId])
+}
+
+model Rsvp {
+  id          String   @id @default(cuid())
+  guestId     String   @unique
+  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  status      String // YES | MAYBE | NO
+  partySize   Int      @default(1) // counted only when status = YES
+  message     String?
+  respondedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  answers     RsvpAnswer[]
+}
+
+model CustomQuestion {
+  id       String @id @default(cuid())
+  eventId  String
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  order    Int    @default(0)
+  type     String // TEXT | SINGLE | MULTI | YESNO
+  label    String
+  optionsJson String? // string[] as JSON for SINGLE/MULTI
+  answers  RsvpAnswer[]
+
+  @@index([eventId])
+}
+
+model RsvpAnswer {
+  id         String         @id @default(cuid())
+  rsvpId     String
+  rsvp       Rsvp           @relation(fields: [rsvpId], references: [id], onDelete: Cascade)
+  questionId String
+  question   CustomQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  value      String // text, chosen option, JSON array for MULTI, "yes"/"no"
+
+  @@unique([rsvpId, questionId])
+}
+
+model AttendeeProfile {
+  id         String  @id @default(cuid())
+  guestId    String  @unique
+  guest      Guest   @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shareLevel String  @default("MINIMAL") // MINIMAL | SOCIAL | OPEN
+  photo      String? // storage key
+  bio        String? // one short sentence
+  instagram  String? // username only, never a full URL
+  removedByAdminAt DateTime?
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------- Ops ----------
+
+model EmailJob {
+  id          String    @id @default(cuid())
+  type        String // RSVP_NOTIFY | DAILY_DIGEST | PRE_ANON_WARNING | ORGANIZER_REMINDER
+  toEmail     String
+  payloadJson String
+  status      String    @default("PENDING") // PENDING | SENT | FAILED
+  scheduledAt DateTime  @default(now())
+  sentAt      DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, scheduledAt])
+}
+
+model AuditEvent {
+  id        String   @id @default(cuid())
+  actorType String // ORGANIZER | ADMIN | SYSTEM | GUEST
+  actorId   String? // internal id only, never PII
+  eventId   String?
+  action    String // e.g. event.publish, guest.delete, admin.disable_event, lifecycle.anonymize
+  metaJson  String?
+  createdAt DateTime @default(now())
+
+  @@index([eventId, createdAt])
+}
+
+model Report {
+  id         String    @id @default(cuid())
+  targetType String // EVENT | PROFILE
+  targetRef  String // event slug or profile id as provided by reporter
+  reason     String
+  details    String?
+  status     String    @default("OPEN") // OPEN | RESOLVED | DISMISSED
+  handledBy  String?
+  handledAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([status, createdAt])
+}

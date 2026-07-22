@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* "באים?" design tokens — warm paper & ink base with punchy accent colors.
+   Deliberately not: purple gradients, glassmorphism, generic dashboard gray. */
+@theme {
+  /* base */
+  --color-paper: #faf7f2;
+  --color-cream: #f3ede2;
+  --color-sand: #e9e0d0;
+  --color-ink: #211c15;
+  --color-ink-soft: #4a4438;
+  --color-ink-faint: #857d70;
+  --color-line: #e5dccb;
+
+  /* brand + accents (accessible on paper) */
+  --color-coral: #e85d4c;
+  --color-coral-deep: #c23a29;
+  --color-coral-soft: #fdeeec;
+  --color-ocean: #2f6f8f;
+  --color-ocean-soft: #e8f1f5;
+  --color-lime: #5a7d2a;
+  --color-lime-soft: #eef3e2;
+  --color-violet: #6d5a9e;
+  --color-violet-soft: #efecf7;
+  --color-amber: #a86e13;
+  --color-amber-soft: #faf1df;
+  --color-rose: #b84a6e;
+  --color-rose-soft: #f9ecf1;
+
+  /* status */
+  --color-yes: #3e7d3a;
+  --color-yes-soft: #e9f3e8;
+  --color-maybe: #a86e13;
+  --color-maybe-soft: #faf1df;
+  --color-no: #a03e3e;
+  --color-no-soft: #f7e9e9;
+
+  /* dark event-page surfaces (midnight template) */
+  --color-night: #17141f;
+  --color-night-soft: #241f30;
+
+  --font-sans: var(--font-heebo), "Heebo", system-ui, sans-serif;
+  --font-display: var(--font-frank), "Frank Ruhl Libre", Georgia, serif;
+
+  --radius-card: 1.25rem;
+  --shadow-card: 0 1px 2px rgb(33 28 21 / 0.05), 0 6px 24px -8px rgb(33 28 21 / 0.12);
+  --shadow-pop: 0 2px 4px rgb(33 28 21 / 0.08), 0 16px 40px -12px rgb(33 28 21 / 0.25);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+}
+
+/* Clear, consistent focus for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-sand);
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade {
+  animation: fade 0.15s ease both;
+}
+
+/* Comfortable tap targets on mobile */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }

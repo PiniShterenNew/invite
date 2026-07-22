@@ -32,10 +32,26 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
+# local AI/editor settings
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# baim: local data & generated files (never commit real user data)
+/dev.db
+/dev.db-journal
+/prisma/dev.db
+/prisma/dev.db-journal
+/prisma/test.db
+/prisma/test.db-journal
+/prisma/schema.test.prisma
+.dev-mailbox/
+.uploads/
+/src/generated/
