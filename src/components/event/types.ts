@@ -23,6 +23,7 @@ export interface EventView {
   addressHint: "AFTER_RSVP" | "PERSONAL_ONLY" | null; // why the address is hidden, if it is
   template: string;
   accentColor: string;
+  typography: string;
   coverUrl: string | null;
   description: string | null;
   dressCode: string | null;

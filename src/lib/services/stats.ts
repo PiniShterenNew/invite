@@ -6,6 +6,7 @@ export interface EventStats {
   maybeGuests: number;
   noGuests: number;
   pendingGuests: number;
+  sharedGuests: number;
   openedLinks: number;
   expectedAttendees: number; // sum of partySize for YES — people, not rows
   capacity: number | null;
@@ -25,6 +26,7 @@ export async function eventStats(eventId: string): Promise<EventStats> {
     maybeGuests: byStatus("MAYBE"),
     noGuests: byStatus("NO"),
     pendingGuests: guests.filter((g) => !g.rsvp).length,
+    sharedGuests: guests.filter((g) => g.shareOpenedAt).length,
     openedLinks: guests.filter((g) => g.linkOpenedAt).length,
     expectedAttendees: yesAgg._sum.partySize ?? 0,
     capacity: event?.capacity ?? null,

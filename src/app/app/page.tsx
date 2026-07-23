@@ -16,7 +16,10 @@ export default async function EventsListPage() {
   const events = await db.event.findMany({
     where: { organizerId: user.id },
     orderBy: [{ status: "asc" }, { startsAt: "desc" }],
-    include: { _count: { select: { guests: true } } },
+    include: {
+      _count: { select: { guests: true } },
+      guests: { select: { rsvp: { select: { status: true } } } },
+    },
   });
 
   const active = events.filter((e) => e.status !== "ARCHIVED");
@@ -43,27 +46,44 @@ export default async function EventsListPage() {
         />
       ) : (
         <ul className="space-y-3">
-          {active.map((e) => (
-            <li key={e.id}>
-              <Link
-                href={e.status === "DRAFT" ? `/app/events/${e.id}/edit` : `/app/events/${e.id}`}
-                className="block bg-white rounded-card border border-line/60 shadow-card p-4 hover:shadow-pop transition-shadow"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-bold text-ink truncate">{e.name || t.wizard.title}</p>
-                    <p className="text-sm text-ink-faint">
-                      {t.eventTypes[e.type as EventType]} · {formatShortDate(e.startsAt, e.timezone)} · {e._count.guests}{" "}
-                      {t.dashboard.guests}
-                    </p>
+          {active.map((e) => {
+            const responded = e.guests.filter((g) => g.rsvp).length;
+            const total = e._count.guests;
+            return (
+              <li key={e.id}>
+                <Link
+                  href={e.status === "DRAFT" ? `/app/events/${e.id}/edit` : `/app/events/${e.id}`}
+                  className="block bg-white rounded-card border border-line/60 shadow-card p-4 hover:shadow-pop transition-shadow"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-ink truncate">{e.name || t.wizard.title}</p>
+                      <p className="text-sm text-ink-faint">
+                        {t.eventTypes[e.type as EventType]} · {formatShortDate(e.startsAt, e.timezone)} · {total}{" "}
+                        {t.dashboard.guests}
+                      </p>
+                    </div>
+                    <Badge tone={statusTone[e.status as keyof typeof statusTone] ?? "neutral"}>
+                      {t.dashboard[`status${e.status}` as `status${"DRAFT" | "PUBLISHED" | "ENDED" | "ARCHIVED"}`]}
+                    </Badge>
                   </div>
-                  <Badge tone={statusTone[e.status as keyof typeof statusTone] ?? "neutral"}>
-                    {t.dashboard[`status${e.status}` as `status${"DRAFT" | "PUBLISHED" | "ENDED" | "ARCHIVED"}`]}
-                  </Badge>
-                </div>
-              </Link>
-            </li>
-          ))}
+                  {total > 0 && e.status !== "DRAFT" && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-cream rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-coral rounded-full transition-all"
+                          style={{ width: `${Math.round((responded / total) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-semibold text-ink-faint tabular-nums shrink-0">
+                        {responded}/{total} {t.dashboard.responded}
+                      </span>
+                    </div>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
 

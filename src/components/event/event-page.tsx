@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { t } from "@/lib/i18n/he";
 import { formatEventDate, formatEventTime, gmapsUrl, wazeUrl } from "@/lib/format";
 import type { EventView, ViewerContext } from "@/components/event/types";
-import { templateStyle, accentStyle } from "@/components/event/templates";
+import { templateStyle, accentStyle, typographyStyle } from "@/components/event/templates";
 import { Countdown } from "@/components/event/countdown";
 import { RsvpForm } from "@/components/event/rsvp-form";
 import Link from "next/link";
@@ -23,6 +23,7 @@ const TYPE_EMOJI: Record<string, string> = {
 export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerContext }) {
   const s = templateStyle(event.template);
   const accent = accentStyle(event.accentColor);
+  const typo = typographyStyle(event.typography);
   const starts = new Date(event.startsAt);
   const rsvpYes = viewer.rsvp?.status === "YES";
 
@@ -51,7 +52,7 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
           <p className="text-3xl mb-1" aria-hidden>
             {TYPE_EMOJI[event.type] ?? "🎉"}
           </p>
-          <h1 className={s.heroTitle}>{event.name}</h1>
+          <h1 className={clsx(s.heroTitle, typo)}>{event.name}</h1>
           <p className={clsx("mt-2 font-medium", s.heroMeta)}>{t.invite.hostedBy(event.hostName)}</p>
         </header>
 
