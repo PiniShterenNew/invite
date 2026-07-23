@@ -31,18 +31,22 @@ if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
 providers.push(Credentials({
   credentials: { email: { type: "email" }, password: { type: "password" } },
   async authorize(credentials) {
-    const email = typeof credentials.email === "string" ? credentials.email.trim().toLowerCase() : "";
-    const password = typeof credentials.password === "string" ? credentials.password : "";
-    if (!email || !password) return null;
+    try {
+      const email = typeof credentials.email === "string" ? credentials.email.trim().toLowerCase() : "";
+      const password = typeof credentials.password === "string" ? credentials.password : "";
+      if (!email || !password) return null;
 
-    const user = await db.user.findUnique({ where: { email } });
-    if (!user?.passwordHash) return null;
-    if (user.disabledAt) return null;
+      const user = await db.user.findUnique({ where: { email } });
+      if (!user?.passwordHash) return null;
+      if (user.disabledAt) return null;
 
-    const valid = await verifyPassword(password, user.passwordHash);
-    if (!valid) return null;
+      const valid = await verifyPassword(password, user.passwordHash);
+      if (!valid) return null;
 
-    return { id: user.id, email: user.email, name: user.name, image: user.image };
+      return { id: user.id, email: user.email, name: user.name, image: user.image };
+    } catch {
+      return null;
+    }
   },
 }));
 
@@ -57,14 +61,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user }) {
       if (!user.email) return false;
-      const existing = await db.user.findUnique({ where: { email: user.email } });
-      return !existing?.disabledAt;
+      try {
+        const existing = await db.user.findUnique({ where: { email: user.email } });
+        return !existing?.disabledAt;
+      } catch {
+        return true;
+      }
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { role: true } });
-        token.role = dbUser?.role ?? "USER";
+        try {
+          const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { role: true } });
+          token.role = dbUser?.role ?? "USER";
+        } catch {
+          token.role = "USER";
+        }
       }
       return token;
     },

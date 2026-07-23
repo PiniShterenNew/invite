@@ -6,7 +6,7 @@
     "postinstall": "prisma generate",
     "prebuild": "node scripts/prepare-sqlite-schema.mjs && prisma generate --config prisma.test.config.ts",
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "build": "prisma generate && node -e \"if(process.env.DATABASE_URL||process.env.DIRECT_URL){const{execSync}=require('child_process');execSync('npx prisma migrate deploy',{stdio:'inherit'})}else{console.log('⚠ No DB URL — skipping migrate deploy')}\" && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
