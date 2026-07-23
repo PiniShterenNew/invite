@@ -38,7 +38,8 @@ export async function registerUser(_prev: { error?: string } | null, formData: F
     await db.user.create({ data: { email, passwordHash: hashed, name } });
   }
 
-  await signIn("credentials", { email, password, redirectTo: "/app" });
+  const url = await signIn("credentials", { email, password, redirect: false });
+  if (!url || url.includes("error")) return { error: t.auth.invalidCredentials };
   redirect("/app");
 }
 
@@ -52,14 +53,7 @@ export async function loginWithPassword(_prev: { error?: string } | null, formDa
     return { error: t.common.tooManyRequests ?? "נסו שוב מאוחר יותר" };
   }
 
-  try {
-    await signIn("credentials", { email, password, redirectTo: "/app" });
-  } catch (e: unknown) {
-    if (e && typeof e === "object" && "type" in e && (e as { type: string }).type === "CredentialsSignin") {
-      return { error: t.auth.invalidCredentials };
-    }
-    throw e;
-  }
-
+  const url = await signIn("credentials", { email, password, redirect: false });
+  if (!url || url.includes("error")) return { error: t.auth.invalidCredentials };
   redirect("/app");
 }
