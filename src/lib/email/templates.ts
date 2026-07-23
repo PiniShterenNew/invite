@@ -35,6 +35,12 @@ export const dailyDigestEmail = (eventName: string, summary: string, dashboardUr
   text: `${eventName}: ${summary}\n${dashboardUrl}`,
 });
 
+export const passwordResetEmail = (url: string) => ({
+  subject: "איפוס סיסמה — באים?",
+  html: shell("איפוס סיסמה", `<p style="color:#4a4438">לחצו על הכפתור כדי לבחור סיסמה חדשה. הקישור תקף לשעה אחת.</p><p style="margin:24px 0">${btn(url, "איפוס סיסמה")}</p><p style="font-size:12px;color:#8a8378">לא ביקשתם? אפשר להתעלם מהמייל.</p>`),
+  text: `איפוס סיסמה לבאים?: ${url}`,
+});
+
 export const preAnonWarningEmail = (eventName: string, exportUrl: string, days: number) => ({
   subject: `הנתונים של ${eventName} יימחקו בעוד ${days} ימים`,
   html: shell(

@@ -9,8 +9,25 @@ import { PasswordForm } from "@/components/auth/password-form";
 
 export const metadata = { title: t.nav.login };
 
+function Divider() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex-1 border-t border-line" />
+      <span className="text-xs text-ink-faint font-semibold">{t.auth.or}</span>
+      <div className="flex-1 border-t border-line" />
+    </div>
+  );
+}
+
 export default async function LoginPage() {
-  if (await currentUser()) redirect("/app");
+  let loggedIn = false;
+  try {
+    loggedIn = Boolean(await currentUser());
+  } catch {
+    // DB might not be ready yet — continue to show login page
+  }
+  if (loggedIn) redirect("/app");
+
   const devMode = process.env.NODE_ENV !== "production" && !process.env.RESEND_API_KEY;
 
   return (
@@ -26,25 +43,26 @@ export default async function LoginPage() {
 
         <div className="bg-white rounded-card shadow-card border border-line/60 p-6 space-y-4">
           {hasGoogleAuth && (
-            <form
-              action={async () => {
-                "use server";
-                await signIn("google", { redirectTo: "/app" });
-              }}
-            >
-              <Button type="submit" variant="secondary" full>
-                {t.auth.google}
-              </Button>
-            </form>
+            <>
+              <form
+                action={async () => {
+                  "use server";
+                  await signIn("google", { redirectTo: "/app" });
+                }}
+              >
+                <Button type="submit" variant="secondary" full>
+                  {t.auth.google}
+                </Button>
+              </form>
+              <Divider />
+            </>
           )}
-
-          {hasGoogleAuth && <div className="flex items-center gap-3"><div className="flex-1 border-t border-line" /><span className="text-xs text-ink-faint font-semibold">{t.auth.or}</span><div className="flex-1 border-t border-line" /></div>}
 
           <PasswordForm />
 
           {hasEmailAuth && (
             <>
-              <div className="flex items-center gap-3"><div className="flex-1 border-t border-line" /><span className="text-xs text-ink-faint font-semibold">{t.auth.or}</span><div className="flex-1 border-t border-line" /></div>
+              <Divider />
               <form
                 className="space-y-3"
                 action={async (formData: FormData) => {

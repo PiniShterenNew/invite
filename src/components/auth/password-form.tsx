@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { t } from "@/lib/i18n/he";
 import { registerUser, loginWithPassword } from "@/app/actions/auth";
@@ -35,12 +36,19 @@ export function PasswordForm() {
           {pending ? t.common.loading : mode === "login" ? t.auth.loginCta : t.auth.registerCta}
         </Button>
       </form>
-      <p className="text-center text-sm text-ink-faint">
-        {mode === "login" ? t.auth.noAccount : t.auth.hasAccount}{" "}
-        <button type="button" className="font-semibold text-coral-deep underline underline-offset-2" onClick={() => setMode(mode === "login" ? "register" : "login")}>
-          {mode === "login" ? t.auth.registerCta : t.auth.loginCta}
-        </button>
-      </p>
+      <div className="flex items-center justify-between text-sm">
+        <p className="text-ink-faint">
+          {mode === "login" ? t.auth.noAccount : t.auth.hasAccount}{" "}
+          <button type="button" className="font-semibold text-coral-deep underline underline-offset-2" onClick={() => setMode(mode === "login" ? "register" : "login")}>
+            {mode === "login" ? t.auth.registerCta : t.auth.loginCta}
+          </button>
+        </p>
+        {mode === "login" && (
+          <Link href="/login/forgot" className="text-ink-faint hover:text-coral-deep font-medium">
+            {t.auth.forgotPassword}
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
