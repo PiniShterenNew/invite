@@ -33,6 +33,8 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
     template: event.template,
     accentColor: event.accentColor,
     typography: event.typography,
+    backgroundPattern: event.backgroundPattern,
+    fontSize: event.fontSize,
     coverUrl: event.coverImage ? `/api/uploads/${event.coverImage}` : null,
     description: event.description ?? "",
     dressCode: event.dressCode ?? "",

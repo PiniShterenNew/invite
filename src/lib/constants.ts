@@ -29,11 +29,17 @@ export type ShareLevel = (typeof SHARE_LEVELS)[number];
 export const NOTIFY_MODES = ["IMMEDIATE", "DAILY", "NONE"] as const;
 export type NotifyMode = (typeof NOTIFY_MODES)[number];
 
-export const TEMPLATES = ["classic", "midnight", "sunset", "garden"] as const;
+export const TEMPLATES = ["classic", "midnight", "sunset", "garden", "confetti", "minimal"] as const;
 export type TemplateId = (typeof TEMPLATES)[number];
 
 export const ACCENT_COLORS = ["coral", "ocean", "lime", "violet", "amber", "rose"] as const;
 export type AccentColor = (typeof ACCENT_COLORS)[number];
+
+export const BACKGROUND_PATTERNS = ["none", "dots", "waves", "confetti", "geometric"] as const;
+export type BackgroundPattern = (typeof BACKGROUND_PATTERNS)[number];
+
+export const FONT_SIZES = ["compact", "normal", "large"] as const;
+export type FontSize = (typeof FONT_SIZES)[number];
 
 export const MAX_QUESTIONS = 3;
 export const MAX_PARTY_PER_GUEST = 10;

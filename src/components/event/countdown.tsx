@@ -44,11 +44,9 @@ export function Countdown({ target, chipClass }: { target: string; chipClass: st
     </span>
   );
 
-  // Force RTL flow so the largest unit (days) always reads on the right,
-  // then hours, then minutes — regardless of any inherited direction.
   return (
     <div
-      dir="rtl"
+      dir="ltr"
       className="flex items-stretch justify-center gap-2"
       role="timer"
       aria-label={`${days} ${t.invite.countdownDays}, ${hours} ${t.invite.countdownHours}, ${minutes} ${t.invite.countdownMinutes}`}

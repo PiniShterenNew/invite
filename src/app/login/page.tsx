@@ -5,6 +5,7 @@ import { currentUser } from "@/lib/authz";
 import { emailSchema } from "@/lib/validation/schemas";
 import { t } from "@/lib/i18n/he";
 import { Button, Input } from "@/components/ui";
+import { PasswordForm } from "@/components/auth/password-form";
 
 export const metadata = { title: t.nav.login };
 
@@ -37,23 +38,32 @@ export default async function LoginPage() {
             </form>
           )}
 
-          {hasEmailAuth && <form
-            className="space-y-3"
-            action={async (formData: FormData) => {
-              "use server";
-              const email = emailSchema.safeParse(formData.get("email"));
-              if (!email.success) redirect("/login?error=email");
-              await signIn("resend", { email: email.data, redirectTo: "/app" });
-            }}
-          >
-            <label className="block space-y-1.5">
-              <span className="text-sm font-semibold text-ink">{t.auth.emailLabel}</span>
-              <Input type="email" name="email" required placeholder={t.auth.emailPlaceholder} dir="ltr" autoComplete="email" />
-            </label>
-            <Button type="submit" full>
-              {t.auth.sendLink}
-            </Button>
-          </form>}
+          {hasGoogleAuth && <div className="flex items-center gap-3"><div className="flex-1 border-t border-line" /><span className="text-xs text-ink-faint font-semibold">{t.auth.or}</span><div className="flex-1 border-t border-line" /></div>}
+
+          <PasswordForm />
+
+          {hasEmailAuth && (
+            <>
+              <div className="flex items-center gap-3"><div className="flex-1 border-t border-line" /><span className="text-xs text-ink-faint font-semibold">{t.auth.or}</span><div className="flex-1 border-t border-line" /></div>
+              <form
+                className="space-y-3"
+                action={async (formData: FormData) => {
+                  "use server";
+                  const email = emailSchema.safeParse(formData.get("email"));
+                  if (!email.success) redirect("/login?error=email");
+                  await signIn("resend", { email: email.data, redirectTo: "/app" });
+                }}
+              >
+                <label className="block space-y-1.5">
+                  <span className="text-sm font-semibold text-ink">{t.auth.sendLink}</span>
+                  <Input type="email" name="email" required placeholder={t.auth.emailPlaceholder} dir="ltr" autoComplete="email" />
+                </label>
+                <Button type="submit" variant="secondary" full>
+                  {t.auth.sendLink}
+                </Button>
+              </form>
+            </>
+          )}
 
           {!hasGoogleAuth && !hasEmailAuth && (
             <p className="text-sm text-center text-ink-faint">יש להשלים את הגדרת ההתחברות עם Google.</p>

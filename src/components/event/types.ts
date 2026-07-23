@@ -24,6 +24,8 @@ export interface EventView {
   template: string;
   accentColor: string;
   typography: string;
+  backgroundPattern: string;
+  fontSize: string;
   coverUrl: string | null;
   description: string | null;
   dressCode: string | null;

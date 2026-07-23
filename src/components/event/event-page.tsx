@@ -3,9 +3,10 @@ import { clsx } from "clsx";
 import { t } from "@/lib/i18n/he";
 import { formatEventDate, formatEventTime, gmapsUrl, wazeUrl } from "@/lib/format";
 import type { EventView, ViewerContext } from "@/components/event/types";
-import { templateStyle, accentStyle, typographyStyle } from "@/components/event/templates";
+import { templateStyle, accentStyle, typographyStyle, patternClass, fontSizeClass } from "@/components/event/templates";
 import { Countdown } from "@/components/event/countdown";
 import { RsvpForm } from "@/components/event/rsvp-form";
+import { Calendar, MapPin, Navigation, CalendarPlus, Users, Sparkles, Music } from "lucide-react";
 import Link from "next/link";
 
 // The invitation page a guest sees. Server component; all privacy filtering
@@ -24,11 +25,13 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
   const s = templateStyle(event.template);
   const accent = accentStyle(event.accentColor);
   const typo = typographyStyle(event.typography);
+  const pattern = patternClass(event.backgroundPattern);
+  const scale = fontSizeClass(event.fontSize);
   const starts = new Date(event.startsAt);
   const rsvpYes = viewer.rsvp?.status === "YES";
 
   return (
-    <div className={clsx("min-h-dvh", s.page)}>
+    <div className={clsx("min-h-dvh", s.page, pattern, scale)}>
       <div className="max-w-lg mx-auto pb-16">
         {event.announcement && (
           <div className={clsx("mx-4 mt-4 rounded-2xl px-4 py-3 font-semibold text-sm", accent.solid)} role="status">
@@ -66,8 +69,8 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
           {/* when & where */}
           <section className={clsx("p-5 space-y-4", s.card)}>
             <div className="flex items-start gap-3">
-              <span className={clsx("grid size-10 shrink-0 place-items-center rounded-xl text-lg", s.chip)} aria-hidden>
-                📅
+              <span className={clsx("grid size-10 shrink-0 place-items-center rounded-xl", s.chip)} aria-hidden>
+                <Calendar className="size-5" />
               </span>
               <div>
                 <p className="font-bold">{formatEventDate(starts, event.timezone)}</p>
@@ -79,8 +82,8 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
             </div>
             {(event.locationName || event.locationAddress || event.addressHint) && (
               <div className="flex items-start gap-3">
-                <span className={clsx("grid size-10 shrink-0 place-items-center rounded-xl text-lg", s.chip)} aria-hidden>
-                  📍
+                <span className={clsx("grid size-10 shrink-0 place-items-center rounded-xl", s.chip)} aria-hidden>
+                  <MapPin className="size-5" />
                 </span>
                 <div className="min-w-0 space-y-1.5">
                   {event.locationName && <p className="font-bold">{event.locationName}</p>}
@@ -94,7 +97,7 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          🧭 {t.invite.navigateWaze}
+                          <Navigation className="size-4" /> {t.invite.navigateWaze}
                         </a>
                         <a
                           className={clsx("inline-flex items-center gap-1.5 rounded-xl px-3 min-h-10 text-sm font-bold transition-all active:scale-[0.97]", accent.soft, accent.text)}
@@ -102,7 +105,7 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          📍 {t.invite.navigateGmaps}
+                          <MapPin className="size-4" /> {t.invite.navigateGmaps}
                         </a>
                       </div>
                     </>
@@ -141,21 +144,21 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
                 href={`/api/ics/${viewer.token}`}
                 className={clsx("flex items-center gap-2 rounded-2xl px-4 min-h-12 font-bold transition-all active:scale-[0.98]", accent.soft, accent.text)}
               >
-                📆 {t.invite.addToCalendar}
+                <CalendarPlus className="size-5" /> {t.invite.addToCalendar}
               </a>
               {event.showGuestList && (
                 <Link
                   href={`/i/${viewer.token}/attendees`}
                   className={clsx("flex items-center gap-2 rounded-2xl px-4 min-h-12 font-bold transition-all active:scale-[0.98]", accent.soft, accent.text)}
                 >
-                  👥 {t.invite.viewAttendees}
+                  <Users className="size-5" /> {t.invite.viewAttendees}
                 </Link>
               )}
               <Link
                 href={`/i/${viewer.token}/profile`}
                 className={clsx("flex items-center gap-2 rounded-2xl px-4 min-h-12 font-bold transition-all active:scale-[0.98]", accent.soft, accent.text)}
               >
-                ✨ {viewer.hasProfile ? t.profile.title : t.profile.createCta}
+                <Sparkles className="size-5" /> {viewer.hasProfile ? t.profile.title : t.profile.createCta}
               </Link>
             </section>
           )}
@@ -195,7 +198,7 @@ export function EventPage({ event, viewer }: { event: EventView; viewer: ViewerC
           {event.playlistUrl && (
             <section className={clsx("p-5", s.card)}>
               <a href={event.playlistUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-4">
-                🎵 {t.invite.playlist}
+                <Music className="size-5" /> {t.invite.playlist}
               </a>
             </section>
           )}

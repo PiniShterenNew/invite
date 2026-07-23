@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n/he";
 import { archiveEvent, deleteEventPermanently, duplicateEvent } from "@/app/actions/organizer";
 import { Button, ButtonLink } from "@/components/ui";
+import { Eye, Download, Copy, Archive, Trash2 } from "lucide-react";
 
 export function EventActions({ eventId, eventName, status }: { eventId: string; eventName: string; status: string }) {
   const router = useRouter();
@@ -14,13 +15,13 @@ export function EventActions({ eventId, eventName, status }: { eventId: string; 
     <section className="bg-white rounded-card border border-line/60 shadow-card p-5 space-y-2">
       <div className="flex flex-wrap gap-2">
         <ButtonLink href={`/app/events/${eventId}/preview`} variant="secondary">
-          {t.dashboard.preview}
+          <Eye className="size-4" /> {t.dashboard.preview}
         </ButtonLink>
         <a
           href={`/api/events/${eventId}/export`}
-          className="inline-flex items-center rounded-2xl px-5 min-h-11 font-semibold bg-cream text-ink border border-line hover:bg-sand"
+          className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-11 font-semibold bg-cream text-ink border border-line hover:bg-sand"
         >
-          {t.dashboard.exportCsv}
+          <Download className="size-4" /> {t.dashboard.exportCsv}
         </a>
         <Button
           type="button"
@@ -33,7 +34,7 @@ export function EventActions({ eventId, eventName, status }: { eventId: string; 
             })
           }
         >
-          {t.dashboard.duplicate}
+          <Copy className="size-4" /> {t.dashboard.duplicate}
         </Button>
         {status !== "ARCHIVED" && (
           <Button
@@ -47,7 +48,7 @@ export function EventActions({ eventId, eventName, status }: { eventId: string; 
               })
             }
           >
-            {t.dashboard.archive}
+            <Archive className="size-4" /> {t.dashboard.archive}
           </Button>
         )}
         <Button
@@ -62,7 +63,7 @@ export function EventActions({ eventId, eventName, status }: { eventId: string; 
             });
           }}
         >
-          {t.dashboard.deleteEvent}
+          <Trash2 className="size-4" /> {t.dashboard.deleteEvent}
         </Button>
       </div>
     </section>

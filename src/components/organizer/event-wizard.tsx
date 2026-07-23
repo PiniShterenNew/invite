@@ -14,6 +14,8 @@ import {
   NOTIFY_MODES,
   QUESTION_TYPES,
   TEMPLATES,
+  BACKGROUND_PATTERNS,
+  FONT_SIZES,
 } from "@/lib/constants";
 import {
   publishEvent,
@@ -28,6 +30,7 @@ import { Button, ButtonLink, Field, Input, SegmentedOption, Textarea } from "@/c
 import { DatePicker, Dropdown, TimePicker, Toggle } from "@/components/controls";
 import { scrollToTop } from "@/lib/scroll";
 import { ACCENT_STYLES, TEMPLATE_STYLES, TYPOGRAPHY_STYLES, templateStyle, accentStyle } from "@/components/event/templates";
+import { X, Rocket, CheckCircle2, Eye } from "lucide-react";
 
 // 5-step creation wizard. Each step saves through its own server action;
 // moving between steps always persists the current one first (auto-save).
@@ -50,6 +53,8 @@ export interface WizardInitial {
   template: string;
   accentColor: string;
   typography: string;
+  backgroundPattern: string;
+  fontSize: string;
   coverUrl: string | null;
   description: string;
   dressCode: string;
@@ -117,7 +122,7 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
             accessCode,
           });
         case 2:
-          return saveDesign(s.id, { template: s.template, accentColor: s.accentColor, typography: s.typography });
+          return saveDesign(s.id, { template: s.template, accentColor: s.accentColor, typography: s.typography, backgroundPattern: s.backgroundPattern, fontSize: s.fontSize });
         case 3:
           return saveContent(s.id, {
             description: s.description,
@@ -278,7 +283,7 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
       {step === 2 && (
         <section className="bg-white rounded-card border border-line/60 shadow-card p-5 space-y-4">
           <Field label={t.wizard.templateLabel}>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {TEMPLATES.map((tpl) => {
                 const ts = TEMPLATE_STYLES[tpl];
                 return (
@@ -356,6 +361,45 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
               ))}
             </div>
           </Field>
+          <Field label={t.wizard.patternLabel}>
+            <div className="grid grid-cols-5 gap-2">
+              {BACKGROUND_PATTERNS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => set("backgroundPattern", p)}
+                  aria-pressed={state.backgroundPattern === p}
+                  className={clsx(
+                    "rounded-2xl border-2 p-2 text-center text-xs font-semibold transition-all min-h-12",
+                    state.backgroundPattern === p ? "border-coral bg-coral-soft" : "border-line bg-white"
+                  )}
+                >
+                  {t.wizard[`pattern${p.charAt(0).toUpperCase() + p.slice(1)}` as `pattern${"None" | "Dots" | "Waves" | "Confetti" | "Geometric"}`]}
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label={t.wizard.fontSizeLabel}>
+            <div className="grid grid-cols-3 gap-2">
+              {FONT_SIZES.map((fs) => (
+                <button
+                  key={fs}
+                  type="button"
+                  onClick={() => set("fontSize", fs)}
+                  aria-pressed={state.fontSize === fs}
+                  className={clsx(
+                    "rounded-2xl border-2 p-3 text-center transition-all min-h-12",
+                    state.fontSize === fs ? "border-coral bg-coral-soft" : "border-line bg-white",
+                    fs === "compact" ? "text-sm" : fs === "large" ? "text-lg" : "text-base"
+                  )}
+                >
+                  <span className="font-semibold">
+                    {t.wizard[`fontSize${fs.charAt(0).toUpperCase() + fs.slice(1)}` as `fontSize${"Compact" | "Normal" | "Large"}`]}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </Field>
           <Field label={t.wizard.coverLabel} hint={t.wizard.coverHint}>
             <div className="space-y-3">
               {state.coverUrl && <img src={state.coverUrl} alt="" className="w-full aspect-[3/2] object-cover rounded-2xl" />}
@@ -396,7 +440,7 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
           {/* live design preview */}
           <div className="border-t border-line pt-4">
             <p className="text-sm font-bold text-ink mb-3">{t.wizard.designPreview}</p>
-            <div className={clsx("rounded-2xl overflow-hidden border border-line shadow-card", templateStyle(state.template).page)}>
+            <div className={clsx("rounded-2xl overflow-hidden border border-line shadow-card", templateStyle(state.template).page, state.backgroundPattern !== "none" ? `bg-pattern-${state.backgroundPattern}` : "", state.fontSize === "compact" ? "text-scale-compact" : state.fontSize === "large" ? "text-scale-large" : "")}>
               {state.coverUrl && (
                 <img src={state.coverUrl} alt="" className="w-full aspect-[3/1] object-cover" />
               )}
@@ -438,7 +482,7 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
                   <Input aria-label={t.wizard.scheduleTime} value={row.time} onChange={(e) => set("schedule", state.schedule.map((r, j) => (j === i ? { ...r, time: e.target.value } : r)))} placeholder="21:00" className="w-24" maxLength={20} />
                   <Input aria-label={t.wizard.scheduleWhat} value={row.label} onChange={(e) => set("schedule", state.schedule.map((r, j) => (j === i ? { ...r, label: e.target.value } : r)))} maxLength={80} />
                   <Button type="button" variant="ghost" aria-label={t.common.delete} onClick={() => set("schedule", state.schedule.filter((_, j) => j !== i))}>
-                    ✕
+                    <X className="size-4" />
                   </Button>
                 </div>
               ))}
@@ -476,7 +520,7 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
                 <div className="flex gap-2">
                   <Input aria-label={t.wizard.questionLabel} value={q.label} onChange={(e) => set("questions", state.questions.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder={t.wizard.questionLabel} maxLength={120} />
                   <Button type="button" variant="ghost" aria-label={t.common.delete} onClick={() => set("questions", state.questions.filter((_, j) => j !== i))}>
-                    ✕
+                    <X className="size-4" />
                   </Button>
                 </div>
                 <Dropdown
@@ -551,23 +595,30 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
 
       {/* STEP 5 — publish */}
       {step === 4 && (
-        <section className="bg-white rounded-card border border-line/60 shadow-card p-5 space-y-4 text-center">
-          <p className="text-4xl" aria-hidden>
-            🚀
-          </p>
-          <p className="text-ink-soft">{t.wizard.pasteTitle}</p>
+        <section className={clsx("rounded-card border shadow-card p-5 space-y-4 text-center", state.status === "DRAFT" ? "bg-white border-line/60" : "bg-yes-soft border-yes/20")}>
+          <div className="flex justify-center" aria-hidden>
+            {state.status === "DRAFT" ? <CheckCircle2 className="size-10 text-coral" /> : <Rocket className="size-10 text-yes" />}
+          </div>
+          <p className="text-ink-soft">{state.status === "DRAFT" ? t.wizard.readyToPublish : t.wizard.publishedNextStep}</p>
           <div className="flex flex-col gap-2">
-            <ButtonLink href={`/app/events/${state.id}/preview`} variant="secondary" full>
-              {t.wizard.previewTitle}
-            </ButtonLink>
             {state.status === "DRAFT" ? (
-              <Button type="button" full onClick={publish} disabled={pending || !state.name.trim()}>
-                {pending ? t.common.loading : t.wizard.publish}
-              </Button>
+              <>
+                <ButtonLink href={`/app/events/${state.id}/preview`} variant="secondary" full>
+                  <Eye className="size-4" /> {t.wizard.previewTitle}
+                </ButtonLink>
+                <Button type="button" full onClick={publish} disabled={pending || !state.name.trim()}>
+                  {pending ? t.common.loading : t.wizard.publish}
+                </Button>
+              </>
             ) : (
-              <ButtonLink href={`/app/events/${state.id}/guests`} full>
-                {t.dashboard.guests}
-              </ButtonLink>
+              <>
+                <ButtonLink href={`/app/events/${state.id}/guests`} full>
+                  {t.wizard.manageGuests}
+                </ButtonLink>
+                <ButtonLink href={`/app/events/${state.id}/preview`} variant="secondary" full>
+                  <Eye className="size-4" /> {t.wizard.previewTitle}
+                </ButtonLink>
+              </>
             )}
           </div>
         </section>

@@ -6,6 +6,7 @@ import { setAnnouncement } from "@/app/actions/organizer";
 import { waShareUrl } from "@/lib/format";
 import { tryWebShare } from "@/lib/share-client";
 import { Button, Textarea } from "@/components/ui";
+import { Megaphone, X, Share2 } from "lucide-react";
 
 // Single prominent update (no feed). Sharing opens WhatsApp with a prepared
 // message — the organizer sends it themselves.
@@ -52,7 +53,7 @@ export function AnnouncementCard({
       )}
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={() => save(text)} disabled={pending || !text.trim()}>
-          {t.dashboard.announcementPublish}
+          <Megaphone className="size-4" /> {t.dashboard.announcementPublish}
         </Button>
         {initial && (
           <Button
@@ -64,7 +65,7 @@ export function AnnouncementCard({
               save("");
             }}
           >
-            {t.dashboard.announcementRemove}
+            <X className="size-4" /> {t.dashboard.announcementRemove}
           </Button>
         )}
         {text.trim() && (
@@ -72,10 +73,10 @@ export function AnnouncementCard({
             href={waShareUrl(t.share.updateTemplate(eventName, text.trim(), generalLink))}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded-2xl px-5 min-h-11 font-semibold bg-cream text-ink border border-line hover:bg-sand"
+            className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-11 font-semibold bg-cream text-ink border border-line hover:bg-sand"
             onClick={(e) => tryWebShare(e, t.share.updateTemplate(eventName, text.trim(), generalLink))}
           >
-            {t.dashboard.announcementShare}
+            <Share2 className="size-4" /> {t.dashboard.announcementShare}
           </a>
         )}
       </div>

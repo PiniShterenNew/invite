@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import { t } from "@/lib/i18n/he";
-import { waShareUrl } from "@/lib/format";
+import { waShareUrl, formatShortDate } from "@/lib/format";
 import {
   addGuest,
   addGuestsFromPaste,
@@ -19,6 +19,7 @@ import { parseGuestLines } from "@/lib/services/guest-parse";
 import { tryWebShare } from "@/lib/share-client";
 import { Badge, Button, EmptyState, Field, Input, Textarea } from "@/components/ui";
 import { Dropdown, NumberStepper } from "@/components/controls";
+import { ClipboardPaste, Send, Link2, RefreshCw, Trash2 } from "lucide-react";
 
 export interface GuestRow {
   id: string;
@@ -80,7 +81,7 @@ export function GuestManager({
         {!pasteOpen && !singleOpen ? (
           <div className="flex flex-wrap gap-2">
             <Button type="button" onClick={() => setPasteOpen(true)}>
-              📋 {t.wizard.pasteParse}
+              <ClipboardPaste className="size-4" /> {t.wizard.pasteParse}
             </Button>
             <Button type="button" variant="secondary" onClick={() => setSingleOpen(true)}>
               + {t.wizard.addSingle}
@@ -226,7 +227,7 @@ export function GuestManager({
           {filtered.length === 0 && (
             <li>
               {guests.length === 0 ? (
-                <EmptyState title={t.dashboard.noGuests} subtitle={t.dashboard.noGuestsCta} />
+                <EmptyState title={t.dashboard.noGuests} subtitle={t.dashboard.noGuestsOnboarding} />
               ) : (
                 <p className="text-center text-sm text-ink-faint py-8">{t.dashboard.noResults}</p>
               )}
@@ -270,14 +271,19 @@ function GuestCard({ guest, eventName }: { guest: GuestRow; eventName: string })
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {guest.status ? (
-            <Badge tone={STATUS_TONE[guest.status as keyof typeof STATUS_TONE]}>
-              {guest.status === "YES" ? t.dashboard.yes : guest.status === "MAYBE" ? t.dashboard.maybe : t.dashboard.no}
-              {guest.status === "YES" && guest.partySize && guest.partySize > 1 ? ` ×${guest.partySize}` : ""}
-            </Badge>
-          ) : (
-            <Badge>{t.dashboard.guestStatusPENDING}</Badge>
-          )}
+          <div className="text-end">
+            {guest.status ? (
+              <Badge tone={STATUS_TONE[guest.status as keyof typeof STATUS_TONE]}>
+                {guest.status === "YES" ? t.dashboard.yes : guest.status === "MAYBE" ? t.dashboard.maybe : t.dashboard.no}
+                {guest.status === "YES" && guest.partySize && guest.partySize > 1 ? ` ×${guest.partySize}` : ""}
+              </Badge>
+            ) : (
+              <Badge>{t.dashboard.guestStatusPENDING}</Badge>
+            )}
+            {guest.respondedAt && (
+              <span className="block text-[0.65rem] text-ink-faint mt-0.5">{formatShortDate(new Date(guest.respondedAt))}</span>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -298,7 +304,7 @@ function GuestCard({ guest, eventName }: { guest: GuestRow; eventName: string })
               href={waShareUrl(t.share.messageTemplate(guest.name, eventName, guest.link))}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center rounded-xl px-3 min-h-10 text-sm font-semibold bg-yes-soft text-yes"
+              className="inline-flex items-center gap-1.5 rounded-xl px-3 min-h-10 text-sm font-semibold bg-yes-soft text-yes"
               onClick={(e) => {
                 tryWebShare(e, t.share.messageTemplate(guest.name, eventName, guest.link));
                 startTransition(() => {
@@ -306,28 +312,28 @@ function GuestCard({ guest, eventName }: { guest: GuestRow; eventName: string })
                 });
               }}
             >
-              {t.dashboard.sendInvite}
+              <Send className="size-4" /> {t.dashboard.sendInvite}
             </a>
             <button
               type="button"
-              className="inline-flex items-center rounded-xl px-3 min-h-10 text-sm font-semibold bg-cream text-ink"
+              className="inline-flex items-center gap-1.5 rounded-xl px-3 min-h-10 text-sm font-semibold bg-cream text-ink"
               onClick={() => {
                 navigator.clipboard.writeText(guest.link);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1500);
               }}
             >
-              {copied ? t.common.copied : t.dashboard.copyPersonalLink}
+              <Link2 className="size-4" /> {copied ? t.common.copied : t.dashboard.copyPersonalLink}
             </button>
             <button
               type="button"
               disabled={pending}
-              className="inline-flex items-center rounded-xl px-3 min-h-10 text-sm font-semibold bg-cream text-ink"
+              className="inline-flex items-center gap-1.5 rounded-xl px-3 min-h-10 text-sm font-semibold bg-cream text-ink"
               onClick={() => {
                 if (confirm(t.dashboard.regenerateLink)) startTransition(async () => { await regenerateGuestLink(guest.id); router.refresh(); });
               }}
             >
-              {t.dashboard.regenerateLink}
+              <RefreshCw className="size-4" /> {t.dashboard.regenerateLink}
             </button>
           </div>
 
@@ -357,12 +363,12 @@ function GuestCard({ guest, eventName }: { guest: GuestRow; eventName: string })
           <button
             type="button"
             disabled={pending}
-            className="text-sm font-semibold text-no"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-no"
             onClick={() => {
               if (confirm(t.dashboard.deleteGuestConfirm)) startTransition(async () => { await deleteGuest(guest.id); router.refresh(); });
             }}
           >
-            {t.common.delete}
+            <Trash2 className="size-4" /> {t.common.delete}
           </button>
         </div>
       )}

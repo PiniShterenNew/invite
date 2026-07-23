@@ -119,3 +119,47 @@ select,
 textarea {
   touch-action: manipulation;
 }
+
+/* Background patterns — CSS-only, no images */
+.bg-pattern-dots {
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: rgb(0 0 0 / 0.04);
+}
+
+.bg-pattern-waves {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    currentColor 8px,
+    currentColor 9px
+  );
+  color: rgb(0 0 0 / 0.03);
+}
+
+.bg-pattern-confetti {
+  background-image:
+    radial-gradient(circle 3px at 15% 25%, currentColor 100%, transparent 100%),
+    radial-gradient(circle 2px at 75% 15%, currentColor 100%, transparent 100%),
+    radial-gradient(circle 3px at 45% 70%, currentColor 100%, transparent 100%),
+    radial-gradient(circle 2px at 85% 55%, currentColor 100%, transparent 100%),
+    radial-gradient(circle 2px at 25% 85%, currentColor 100%, transparent 100%);
+  background-size: 80px 80px;
+  color: rgb(0 0 0 / 0.04);
+}
+
+.bg-pattern-geometric {
+  background-image:
+    linear-gradient(30deg, currentColor 12%, transparent 12.5%, transparent 87.5%, currentColor 88%),
+    linear-gradient(150deg, currentColor 12%, transparent 12.5%, transparent 87.5%, currentColor 88%),
+    linear-gradient(30deg, currentColor 12%, transparent 12.5%, transparent 87.5%, currentColor 88%),
+    linear-gradient(150deg, currentColor 12%, transparent 12.5%, transparent 87.5%, currentColor 88%);
+  background-size: 40px 70px;
+  background-position: 0 0, 0 0, 20px 35px, 20px 35px;
+  color: rgb(0 0 0 / 0.03);
+}
+
+/* Font size scaling */
+.text-scale-compact { font-size: 0.9em; }
+.text-scale-large { font-size: 1.1em; }

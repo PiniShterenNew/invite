@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { clsx } from "clsx";
 import { requireUser } from "@/lib/authz";
 import { db } from "@/lib/db";
 import { t } from "@/lib/i18n/he";
@@ -53,7 +54,7 @@ export default async function EventsListPage() {
               <li key={e.id}>
                 <Link
                   href={e.status === "DRAFT" ? `/app/events/${e.id}/edit` : `/app/events/${e.id}`}
-                  className="block bg-white rounded-card border border-line/60 shadow-card p-4 hover:shadow-pop transition-shadow"
+                  className={clsx("block bg-white rounded-card p-4 hover:shadow-pop transition-shadow", e.status === "DRAFT" ? "border-2 border-dashed border-line shadow-none" : "border border-line/60 shadow-card")}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
