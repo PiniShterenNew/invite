@@ -27,7 +27,7 @@ import {
 import { Button, ButtonLink, Field, Input, SegmentedOption, Textarea } from "@/components/ui";
 import { DatePicker, Dropdown, TimePicker, Toggle } from "@/components/controls";
 import { scrollToTop } from "@/lib/scroll";
-import { ACCENT_STYLES } from "@/components/event/templates";
+import { ACCENT_STYLES, TEMPLATE_STYLES, TYPOGRAPHY_STYLES, templateStyle, accentStyle } from "@/components/event/templates";
 
 // 5-step creation wizard. Each step saves through its own server action;
 // moving between steps always persists the current one first (auto-save).
@@ -65,12 +65,6 @@ export interface WizardInitial {
   notifyMode: string;
 }
 
-const TEMPLATE_PREVIEW: Record<string, string> = {
-  classic: "bg-paper border-line",
-  midnight: "bg-night text-white border-transparent",
-  sunset: "bg-gradient-to-b from-[#ffddc2] to-[#fff4ec] border-[#f3d8c3]",
-  garden: "bg-[#f4f7ee] border-[#dde7cd]",
-};
 
 function toLocalInput(iso: string | null): { date: string; time: string } {
   if (!iso) return { date: "", time: "" };
@@ -284,22 +278,33 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
       {step === 2 && (
         <section className="bg-white rounded-card border border-line/60 shadow-card p-5 space-y-4">
           <Field label={t.wizard.templateLabel}>
-            <div className="grid grid-cols-2 gap-2">
-              {TEMPLATES.map((tpl) => (
-                <button
-                  key={tpl}
-                  type="button"
-                  onClick={() => set("template", tpl)}
-                  aria-pressed={state.template === tpl}
-                  className={clsx(
-                    "h-20 rounded-2xl border-2 font-bold capitalize transition-all",
-                    TEMPLATE_PREVIEW[tpl],
-                    state.template === tpl ? "ring-2 ring-coral ring-offset-2" : ""
-                  )}
-                >
-                  {tpl}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-3">
+              {TEMPLATES.map((tpl) => {
+                const ts = TEMPLATE_STYLES[tpl];
+                return (
+                  <button
+                    key={tpl}
+                    type="button"
+                    onClick={() => set("template", tpl)}
+                    aria-pressed={state.template === tpl}
+                    className={clsx(
+                      "rounded-2xl border-2 overflow-hidden transition-all text-start",
+                      state.template === tpl ? "ring-2 ring-coral ring-offset-2" : ""
+                    )}
+                  >
+                    <div className={clsx("p-4 h-36 flex flex-col justify-end", ts.page)}>
+                      <div className={clsx("rounded-xl p-3 space-y-1", ts.card)}>
+                        <p className={clsx("text-sm font-bold truncate", ts.heroTitle?.includes("font-display") ? "font-display" : "")}>
+                          {state.name || t.wizard.title}
+                        </p>
+                        <p className={clsx("text-xs truncate", ts.heroMeta)}>
+                          {state.hostName || t.wizard.hostPlaceholder}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </Field>
           <Field label={t.wizard.accentLabel}>
@@ -317,6 +322,37 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
                     state.accentColor === c ? "border-ink scale-110" : "border-transparent"
                   )}
                 />
+              ))}
+            </div>
+          </Field>
+          <Field label={t.wizard.typographyLabel}>
+            <div className="grid grid-cols-3 gap-2">
+              {(["default", "serif", "bold"] as const).map((typo) => (
+                <button
+                  key={typo}
+                  type="button"
+                  onClick={() => set("typography", typo)}
+                  aria-pressed={state.typography === typo}
+                  className={clsx(
+                    "rounded-2xl border-2 p-3 text-center transition-all min-h-16",
+                    state.typography === typo ? "border-coral bg-coral-soft" : "border-line bg-white"
+                  )}
+                >
+                  <span className={clsx(
+                    "block text-lg leading-tight",
+                    typo === "serif" ? "font-display" : "",
+                    typo === "bold" ? "font-extrabold tracking-tight" : "font-semibold"
+                  )}>
+                    {t.wizard[`typography${typo.charAt(0).toUpperCase() + typo.slice(1)}` as `typography${"Default" | "Serif" | "Bold"}`]}
+                  </span>
+                  <span className={clsx(
+                    "block text-xs mt-1 text-ink-faint",
+                    typo === "serif" ? "font-display" : "",
+                    typo === "bold" ? "font-bold" : ""
+                  )}>
+                    אבגד הוזח
+                  </span>
+                </button>
               ))}
             </div>
           </Field>
@@ -357,6 +393,32 @@ export function EventWizard({ initial }: { initial: WizardInitial }) {
               )}
             </div>
           </Field>
+          {/* live design preview */}
+          <div className="border-t border-line pt-4">
+            <p className="text-sm font-bold text-ink mb-3">{t.wizard.designPreview}</p>
+            <div className={clsx("rounded-2xl overflow-hidden border border-line shadow-card", templateStyle(state.template).page)}>
+              {state.coverUrl && (
+                <img src={state.coverUrl} alt="" className="w-full aspect-[3/1] object-cover" />
+              )}
+              <div className={clsx("p-5 text-center space-y-1", templateStyle(state.template).hero.replace(/pt-\d+/, "pt-4").replace(/pb-\d+/, "pb-4"))}>
+                <p className={clsx(
+                  "text-2xl leading-tight",
+                  templateStyle(state.template).heroTitle,
+                  TYPOGRAPHY_STYLES[state.typography] ?? ""
+                )}>
+                  {state.name || t.wizard.title}
+                </p>
+                <p className={clsx("text-sm", templateStyle(state.template).heroMeta)}>
+                  {state.hostName ? `${state.hostName} מזמין/ה אתכם` : ""}
+                </p>
+              </div>
+              <div className="px-5 pb-4 flex justify-center">
+                <span className={clsx("rounded-xl px-5 py-2 text-sm font-bold", accentStyle(state.accentColor).solid)}>
+                  {t.invite.rsvpTitle}
+                </span>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 

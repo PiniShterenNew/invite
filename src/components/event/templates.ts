@@ -66,5 +66,12 @@ export const ACCENT_STYLES: Record<AccentColor, { solid: string; soft: string; t
   rose: { solid: "bg-rose hover:bg-[#9c3d5c] text-white", soft: "bg-rose-soft", text: "text-rose" },
 };
 
+export const TYPOGRAPHY_STYLES: Record<string, string> = {
+  default: "",
+  serif: "font-display",
+  bold: "font-extrabold tracking-tight",
+};
+
 export const templateStyle = (id: string): TemplateStyle => TEMPLATE_STYLES[(id as TemplateId) in TEMPLATE_STYLES ? (id as TemplateId) : "classic"];
 export const accentStyle = (id: string) => ACCENT_STYLES[(id as AccentColor) in ACCENT_STYLES ? (id as AccentColor) : "coral"];
+export const typographyStyle = (id: string) => TYPOGRAPHY_STYLES[id] ?? "";

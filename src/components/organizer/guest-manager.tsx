@@ -17,7 +17,7 @@ import {
 } from "@/app/actions/organizer";
 import { parseGuestLines } from "@/lib/services/guest-parse";
 import { tryWebShare } from "@/lib/share-client";
-import { Badge, Button, Field, Input, Textarea } from "@/components/ui";
+import { Badge, Button, EmptyState, Field, Input, Textarea } from "@/components/ui";
 import { Dropdown, NumberStepper } from "@/components/controls";
 
 export interface GuestRow {
@@ -223,7 +223,15 @@ export function GuestManager({
           {filtered.map((g) => (
             <GuestCard key={g.id} guest={g} eventName={eventName} />
           ))}
-          {filtered.length === 0 && <li className="text-center text-sm text-ink-faint py-8">—</li>}
+          {filtered.length === 0 && (
+            <li>
+              {guests.length === 0 ? (
+                <EmptyState title={t.dashboard.noGuests} subtitle={t.dashboard.noGuestsCta} />
+              ) : (
+                <p className="text-center text-sm text-ink-faint py-8">{t.dashboard.noResults}</p>
+              )}
+            </li>
+          )}
         </ul>
       </section>
     </div>
@@ -244,9 +252,22 @@ function GuestCard({ guest, eventName }: { guest: GuestRow; eventName: string })
             {guest.name}
             {guest.maxParty > 1 && <span className="text-xs font-medium text-ink-faint"> · {t.dashboard.partyOf} {guest.maxParty}</span>}
           </p>
-          <p className="text-xs text-ink-faint">
-            {guest.linkOpened ? t.dashboard.linkOpened : guest.shareOpened ? t.dashboard.shareOpened : "—"}
-          </p>
+          <div className="flex items-center gap-1 mt-0.5">
+            {[
+              { done: true, label: t.dashboard.funnelInvited },
+              { done: guest.shareOpened, label: t.dashboard.funnelShared },
+              { done: guest.linkOpened, label: t.dashboard.funnelOpened },
+              { done: Boolean(guest.status), label: t.dashboard.funnelResponded },
+            ].map((step, i) => (
+              <div key={i} className="flex items-center gap-1">
+                {i > 0 && <div className={clsx("w-3 h-0.5 rounded-full", step.done ? "bg-coral" : "bg-sand")} />}
+                <div
+                  className={clsx("size-2.5 rounded-full", step.done ? "bg-coral" : "bg-sand")}
+                  title={step.label}
+                />
+              </div>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {guest.status ? (

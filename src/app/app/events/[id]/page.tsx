@@ -1,11 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/authz";
 import { db } from "@/lib/db";
 import { t } from "@/lib/i18n/he";
 import { eventStats } from "@/lib/services/stats";
-import { formatDateTime } from "@/lib/format";
-import { Badge, ButtonLink, Stat } from "@/components/ui";
+import { Stat } from "@/components/ui";
 import { AnnouncementCard } from "@/components/organizer/announcement-card";
 import { EventActions } from "@/components/organizer/event-actions";
 
@@ -26,16 +24,6 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-5 animate-rise">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold text-ink">{event.name}</h1>
-          <p className="text-sm text-ink-faint">{formatDateTime(event.startsAt, event.timezone)}</p>
-        </div>
-        <Badge tone={event.status === "PUBLISHED" ? "yes" : event.status === "ENDED" ? "maybe" : "neutral"}>
-          {t.dashboard[`status${event.status}` as `status${"DRAFT" | "PUBLISHED" | "ENDED" | "ARCHIVED"}`]}
-        </Badge>
-      </div>
-
       {/* headline stats — people, not rows */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
         <Stat label={t.dashboard.invited} value={stats.invitedGuests} />
@@ -44,15 +32,6 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
         <Stat label={t.dashboard.maybe} value={stats.maybeGuests} tone="maybe" />
         <Stat label={t.dashboard.no} value={stats.noGuests} tone="no" />
         <Stat label={t.dashboard.pending} value={stats.pendingGuests} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <ButtonLink href={`/app/events/${event.id}/guests`} full>
-          {t.dashboard.guests} · {t.dashboard.share}
-        </ButtonLink>
-        <ButtonLink href={`/app/events/${event.id}/edit`} variant="secondary" full>
-          {t.dashboard.editEvent}
-        </ButtonLink>
       </div>
 
       <AnnouncementCard eventId={event.id} initial={event.announcement ?? ""} eventName={event.name} generalLink={generalLink} />
@@ -81,12 +60,6 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
       )}
 
       <EventActions eventId={event.id} eventName={event.name} status={event.status} />
-
-      <p className="text-center">
-        <Link href="/app" className="text-sm font-semibold text-ink-faint underline underline-offset-4">
-          {t.common.back}
-        </Link>
-      </p>
     </div>
   );
 }

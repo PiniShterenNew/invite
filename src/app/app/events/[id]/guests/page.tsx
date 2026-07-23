@@ -1,9 +1,11 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/authz";
 import { db } from "@/lib/db";
 import { t } from "@/lib/i18n/he";
+import { eventStats } from "@/lib/services/stats";
+import { Stat } from "@/components/ui";
 import { GuestManager, type GuestRow } from "@/components/organizer/guest-manager";
+import { GuestFunnel } from "@/components/organizer/guest-funnel";
 
 export const metadata = { title: t.dashboard.guests };
 
@@ -16,6 +18,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ id: str
   });
   if (!event) notFound();
 
+  const stats = await eventStats(event.id);
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   const rows: GuestRow[] = event.guests.map((g) => ({
     id: g.id,
@@ -32,17 +35,45 @@ export default async function GuestsPage({ params }: { params: Promise<{ id: str
     respondedAt: g.rsvp?.updatedAt?.toISOString() ?? null,
   }));
 
+  const responded = stats.yesGuests + stats.maybeGuests + stats.noGuests;
+
   return (
     <div className="space-y-5 animate-rise">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-ink">{t.dashboard.guests}</h1>
-          <p className="text-sm text-ink-faint">{event.name}</p>
+      {/* summary stats */}
+      <section className="bg-white rounded-card border border-line/60 shadow-card p-5 space-y-4">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+          <Stat label={t.dashboard.invited} value={stats.invitedGuests} />
+          <Stat label={t.dashboard.shared} value={stats.sharedGuests} />
+          <Stat label={t.dashboard.opened} value={stats.openedLinks} />
+          <Stat label={t.dashboard.responded} value={responded} />
+          <Stat label={t.dashboard.pending} value={stats.pendingGuests} />
         </div>
-        <Link href={`/app/events/${event.id}`} className="text-sm font-semibold text-coral-deep underline underline-offset-4">
-          {t.dashboard.title}
-        </Link>
-      </div>
+        {/* response progress bar */}
+        {stats.invitedGuests > 0 && (
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs font-semibold text-ink-soft">
+              <span>{t.dashboard.responseProgress}</span>
+              <span className="tabular-nums">{responded}/{stats.invitedGuests} {t.dashboard.responded}</span>
+            </div>
+            <div className="h-2.5 bg-cream rounded-full overflow-hidden">
+              <div
+                className="h-full bg-coral rounded-full transition-all duration-500"
+                style={{ width: `${Math.round((responded / stats.invitedGuests) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* guest funnel */}
+      {stats.invitedGuests > 0 && (
+        <GuestFunnel
+          invited={stats.invitedGuests}
+          shared={stats.sharedGuests}
+          opened={stats.openedLinks}
+          responded={responded}
+        />
+      )}
 
       <GuestManager
         eventId={event.id}
