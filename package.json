@@ -6,7 +6,7 @@
     "postinstall": "prisma generate",
     "prebuild": "node scripts/prepare-sqlite-schema.mjs && prisma generate --config prisma.test.config.ts",
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
