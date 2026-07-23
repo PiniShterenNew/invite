@@ -55,6 +55,26 @@ export const TEMPLATE_STYLES: Record<TemplateId, TemplateStyle> = {
     divider: "border-[#dde7cd]",
     chip: "bg-[#e7efd8] text-[#4a5c36]",
   },
+  confetti: {
+    page: "bg-[#fef9f0] text-[#2d1f3d]",
+    hero: "text-center pt-12 pb-10 px-6 bg-gradient-to-br from-[#fde6f0] via-[#fef3e0] to-[#e8f0fe]",
+    heroTitle: "text-5xl sm:text-6xl font-extrabold leading-[1.05]",
+    heroMeta: "text-[#7a5c8f]",
+    card: "bg-white/90 border border-[#f0dce6] shadow-card rounded-3xl",
+    sectionTitle: "text-xl font-extrabold",
+    divider: "border-[#f0dce6]",
+    chip: "bg-[#fde6f0] text-[#7a5c8f]",
+  },
+  minimal: {
+    page: "bg-white text-[#1a1a1a]",
+    hero: "text-center pt-14 pb-10 px-6",
+    heroTitle: "text-4xl sm:text-5xl font-light tracking-tight",
+    heroMeta: "text-[#888]",
+    card: "bg-[#fafafa] border border-[#e5e5e5] rounded-xl",
+    sectionTitle: "text-lg font-medium tracking-wide uppercase",
+    divider: "border-[#e5e5e5]",
+    chip: "bg-[#f0f0f0] text-[#666]",
+  },
 };
 
 export const ACCENT_STYLES: Record<AccentColor, { solid: string; soft: string; text: string }> = {
@@ -75,3 +95,19 @@ export const TYPOGRAPHY_STYLES: Record<string, string> = {
 export const templateStyle = (id: string): TemplateStyle => TEMPLATE_STYLES[(id as TemplateId) in TEMPLATE_STYLES ? (id as TemplateId) : "classic"];
 export const accentStyle = (id: string) => ACCENT_STYLES[(id as AccentColor) in ACCENT_STYLES ? (id as AccentColor) : "coral"];
 export const typographyStyle = (id: string) => TYPOGRAPHY_STYLES[id] ?? "";
+
+const PATTERN_CLASSES: Record<string, string> = {
+  none: "",
+  dots: "bg-pattern-dots",
+  waves: "bg-pattern-waves",
+  confetti: "bg-pattern-confetti",
+  geometric: "bg-pattern-geometric",
+};
+export const patternClass = (id: string) => PATTERN_CLASSES[id] ?? "";
+
+const FONT_SIZE_CLASSES: Record<string, string> = {
+  compact: "text-scale-compact",
+  normal: "",
+  large: "text-scale-large",
+};
+export const fontSizeClass = (id: string) => FONT_SIZE_CLASSES[id] ?? "";

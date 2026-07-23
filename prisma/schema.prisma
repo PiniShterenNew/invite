@@ -19,6 +19,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  passwordHash  String?
   role          String    @default("USER") // USER | ADMIN
   disabledAt    DateTime?
   createdAt     DateTime  @default(now())
@@ -83,10 +84,12 @@ model Event {
   addressReveal   String  @default("AFTER_RSVP") // ALWAYS | AFTER_RSVP | PERSONAL_ONLY
 
   // design (no free editor — template + limited knobs)
-  template   String @default("classic") // classic | midnight | sunset | garden
-  accentColor String @default("coral")
-  typography  String @default("default")
-  coverImage  String? // storage key
+  template          String @default("classic") // classic | midnight | sunset | garden | confetti | minimal
+  accentColor       String @default("coral")
+  typography        String @default("default")
+  backgroundPattern String @default("none")
+  fontSize          String @default("normal")
+  coverImage        String? // storage key
 
   // optional content sections
   description  String?

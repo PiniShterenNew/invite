@@ -52,6 +52,8 @@ export function buildEventView(
     template: event.template,
     accentColor: event.accentColor,
     typography: event.typography,
+    backgroundPattern: event.backgroundPattern,
+    fontSize: event.fontSize,
     coverUrl: imageUrl(event.coverImage),
     description: event.description,
     dressCode: event.dressCode,

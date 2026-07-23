@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Eye } from "lucide-react";
 import { requireUser } from "@/lib/authz";
 import { db } from "@/lib/db";
 import { t } from "@/lib/i18n/he";
@@ -22,7 +23,9 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <div className="bg-ink text-white text-center text-sm font-semibold py-2 sticky top-0 z-20">{t.wizard.previewTitle}</div>
+      <div className="bg-coral text-white text-center text-sm font-semibold py-2 sticky top-0 z-20 flex items-center justify-center gap-2">
+        <Eye className="size-4" /> {t.wizard.previewTitle}
+      </div>
       <EventPage event={view} viewer={viewer} />
     </div>
   );

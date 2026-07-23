@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { t } from "@/lib/i18n/he";
 import { ButtonLink } from "@/components/ui";
+import { PenLine, MessageCircle, CheckCircle, Lock } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -28,15 +29,15 @@ export default function HomePage() {
         </section>
 
         <section className="max-w-2xl mx-auto px-5 pb-16 grid sm:grid-cols-3 gap-4">
-          {[
-            [t.home.step1Title, t.home.step1Text, "✏️"],
-            [t.home.step2Title, t.home.step2Text, "💬"],
-            [t.home.step3Title, t.home.step3Text, "✅"],
-          ].map(([title, text, emoji]) => (
+          {([
+            [t.home.step1Title, t.home.step1Text, PenLine],
+            [t.home.step2Title, t.home.step2Text, MessageCircle],
+            [t.home.step3Title, t.home.step3Text, CheckCircle],
+          ] as const).map(([title, text, Icon]) => (
             <div key={title} className="bg-white rounded-card border border-line/60 shadow-card p-5 text-center">
-              <p className="text-2xl mb-2" aria-hidden>
-                {emoji}
-              </p>
+              <div className="flex justify-center mb-2" aria-hidden>
+                <Icon className="size-7 text-coral" />
+              </div>
               <p className="font-bold text-ink">{title}</p>
               <p className="text-sm text-ink-faint mt-1">{text}</p>
             </div>
@@ -44,7 +45,7 @@ export default function HomePage() {
         </section>
 
         <section className="max-w-2xl mx-auto px-5 pb-20 text-center">
-          <p className="text-sm text-ink-faint">🔒 {t.home.privacyNote}</p>
+          <p className="text-sm text-ink-faint flex items-center justify-center gap-1.5"><Lock className="size-4" /> {t.home.privacyNote}</p>
         </section>
       </main>
 

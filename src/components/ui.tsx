@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import Link from "next/link";
+import { Package } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 
 // Small shared UI kit. Visual language: warm paper, ink text, rounded cards,
@@ -151,9 +152,9 @@ export function SegmentedOption({
 export function EmptyState({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
   return (
     <div className="text-center py-14 px-6 space-y-3">
-      <p className="text-4xl" aria-hidden>
-        🎈
-      </p>
+      <div className="flex justify-center" aria-hidden>
+        <Package className="size-10 text-ink-faint" />
+      </div>
       <p className="text-lg font-bold text-ink">{title}</p>
       {subtitle && <p className="text-sm text-ink-faint">{subtitle}</p>}
       {action && <div className="pt-2 flex justify-center">{action}</div>}

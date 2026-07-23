@@ -12,6 +12,8 @@ import {
   RSVP_STATUSES,
   SHARE_LEVELS,
   TEMPLATES,
+  BACKGROUND_PATTERNS,
+  FONT_SIZES,
 } from "@/lib/constants";
 
 // Shared client/server validation (ADR-005). Every server action parses its
@@ -50,6 +52,8 @@ export const eventDesignSchema = z.object({
   template: z.enum(TEMPLATES),
   accentColor: z.enum(ACCENT_COLORS),
   typography: z.enum(["default", "serif", "bold"]),
+  backgroundPattern: z.enum(BACKGROUND_PATTERNS).default("none"),
+  fontSize: z.enum(FONT_SIZES).default("normal"),
 });
 
 export const questionSchema = z.object({
@@ -148,3 +152,16 @@ export const reportSchema = z.object({
 });
 
 export const emailSchema = z.string().trim().toLowerCase().email().max(200);
+
+export const passwordSchema = z.string().min(8).max(72);
+
+export const registerSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  name: z.string().trim().min(1).max(80).optional(),
+});
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
